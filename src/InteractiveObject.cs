@@ -41,6 +41,13 @@ namespace Cthangover.Core.Interactive
 		/// <summary>Invoked on click with the definition id (wired by <see cref="InteractiveManager"/>).</summary>
 		internal Action<string> OnClickCallback { get; set; }
 
+		/// <summary>
+		/// Drawing order inside the layer (the definition's <c>zIndex</c>). It is a
+		/// place among the layer's children, not a Godot z index: a z index is global
+		/// to the canvas and would lift the object over the dialog box and the panels.
+		/// </summary>
+		public int Order { get; private set; }
+
 		private TextureRect _visual;
 		private ShaderMaterial _highlightMaterial;
 		private Tween _highlightTween;
@@ -98,7 +105,7 @@ namespace Cthangover.Core.Interactive
 			AnchorRight = 1f;
 			AnchorBottom = 1f;
 
-			ZIndex = def.ZIndex;
+			PlaceByOrder(def.ZIndex);
 			Visible = def.Visible;
 			IsEnabled = def.Enabled;
 
@@ -170,6 +177,24 @@ namespace Cthangover.Core.Interactive
 		/// scene transition and by <c>InteractiveManager.Remove</c> for targeted
 		/// cleanup, ensuring no dangling references survive scene teardown.
 		/// </summary>
+		private void PlaceByOrder(int order)
+		{
+			Order = order;
+			var parent = GetParent();
+			if (parent == null)
+				return;
+			var index = parent.GetChildCount() - 1;
+			foreach (var child in parent.GetChildren())
+			{
+				if (child != this && child is InteractiveObject other && other.Order > order)
+				{
+					index = other.GetIndex();
+					break;
+				}
+			}
+			parent.MoveChild(this, index > GetIndex() ? index - 1 : index);
+		}
+
 		public void Destruct()
 		{
 			SceneContextNode.Instance?.RemoveEventObject(ID);

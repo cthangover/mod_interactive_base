@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "author": "ct",
   "description": "Clickable objects for picture scenes: a picture of its own over the background, a glow under the mouse, and a click that starts a scenario.",
-  "category": "engine, library",
+  "categories": ["engine", "library"],
   "depends": ["shell2d_base>=0.1.0", "ui_base>=0.1.0"],
   "sources": [ "src/**/*.cs" ],
   "ui": [],
